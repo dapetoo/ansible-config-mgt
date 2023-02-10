@@ -24,3 +24,5 @@ Click on Settings on the project repo
 Click on Webhook
 Enter the Jenkins server URL and append /github-webhook/ to the URL, select the event types to trigger the webhook
 
+Ansible Development
+git checkout -b feature/ansible-development 
