@@ -18,3 +18,9 @@ sudo apt-get update
 sudo apt-get install jenkins
 ```
 
+Jenkins WebHook & GitHub Hook
+
+Click on Settings on the project repo
+Click on Webhook
+Enter the Jenkins server URL and append /github-webhook/ to the URL, select the event types to trigger the webhook
+
