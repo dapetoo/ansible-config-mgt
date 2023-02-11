@@ -1,44 +1,26 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Build') {
-            steps {
-                script {
-                    sh 'echo "Building Stage"'
-                }
-            }
-        }   
+    environment {
+        ANSIBLE_CONFIG="${WORKSPACE}/deploy/ansible.cfg"
+    }
 
-        stage('Test') {
-            steps {
-                script {
-                    sh 'echo "Testing Stage"'
-                }
-            }
-        }
+    parameters {
+      string(name: 'inventory', defaultValue: 'dev',  description: 'This is the inventory file for the environment to deploy configuration')
+    }
 
-        stage('Package') {
-            steps {
-                script {
-                    sh 'echo "Packaging Stage"'
-                }
+    stages(){
+
+        stage('Checkout code from GitHub'){
+            steps{
+             checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'GitHub token', url: 'https://github.com/dapetoo/ansible-config-mgt.git']])
             }
         }
 
-        stage('Deploy') {
+        stage('Prepare Ansible For Execution') {
             steps {
-                script {
-                    sh 'echo "Deployment Stage"'
-                }
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                script {
-                    sh 'echo "Cleanup Stage"'
-                }
+                sh 'echo ${WORKSPACE}' 
+                sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'  
             }
         }
     }
