@@ -31,6 +31,13 @@
         state: present
       when: ansible_facts['os_family'] == "Debian"
 
+    - name: "install package dependencies"
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: "present"
+      with_items:
+        - unzip
+
   roles:
     - role: buluma.sonarqube
 
@@ -41,9 +48,3 @@
     #     update_cache: yes
     #   when: ansible_distribution == 'Ubuntu'
 
-    - name: "install package dependencies"
-      ansible.builtin.package:
-        name: "{{ item }}"
-        state: "present"
-      with_items:
-        - unzip
