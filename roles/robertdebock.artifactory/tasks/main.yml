@@ -1,0 +1,67 @@
+---
+# tasks file for artifactory
+
+- name: Import assert.yml
+  ansible.builtin.import_tasks: assert.yml
+  run_once: yes
+  delegate_to: localhost
+
+- name: Install yum repository
+  ansible.builtin.get_url:
+    url: "https://releases.jfrog.io/artifactory/artifactory-rpms/artifactory-rpms.repo"
+    dest: /etc/yum.repos.d/bintray-jfrog-artifactory-rpms.repo
+    mode: "0640"
+  when:
+    - ansible_pkg_mgr in [ "dnf", "yum" ]
+
+- name: Configure apt repository
+  block:
+    - name: Trust gpg key
+      ansible.builtin.apt_key:
+        url: "https://releases.jfrog.io/artifactory/api/gpg/key/public"
+        state: present
+        validate_certs: no
+
+    - name: Install deb repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://releases.jfrog.io/artifactory/artifactory-debs {{ ansible_distribution_release | lower }} main"
+        state: present
+  when:
+    - ansible_pkg_mgr in [ "apt" ]
+
+- name: Install package
+  ansible.builtin.package:
+    name: "{{ artifactory_package }}"
+    state: present
+
+- name: Ensure artifactory_file_store_dir exists
+  ansible.builtin.file:
+    path: "{{ artifactory_file_store_dir }}"
+    state: directory
+    mode: "0755"
+    owner: artifactory
+    group: artifactory
+
+- name: Configure artifactory
+  ansible.builtin.template:
+    src: binarystore.xml.j2
+    dest: "{{ artifactory_home }}/binarystore.xml"
+    mode: "0644"
+    owner: artifactory
+    group: artifactory
+  notify:
+    - Restart artifactory
+
+- name: Set ownership for artifactory_logs
+  ansible.builtin.file:
+    path: "{{ artifactory_logs }}"
+    state: directory
+    mode: "0755"
+    owner: artifactory
+    group: artifactory
+
+- name: Start and enable artifactory
+  ansible.builtin.service:
+    name: artifactory
+    state: started
+    enabled: yes

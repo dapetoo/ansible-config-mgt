@@ -3,5 +3,7 @@
   become:  true
   roles:
      - geerlingguy.postgresql
+     - robertdebock.bootstrap
+     - robertdebock.core_dependencies
      - lean_delivery.java
-     - bbaassssiiee.artifactory
+     - robertdebock.artifactory
