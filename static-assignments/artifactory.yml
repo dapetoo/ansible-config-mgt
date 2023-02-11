@@ -2,8 +2,4 @@
 - hosts: artifactory
   become:  true
   roles:
-     - geerlingguy.postgresql
-     - robertdebock.bootstrap
-     - robertdebock.core_dependencies
-     - lean_delivery.java
-     - robertdebock.artifactory 
+     - artifactory 
