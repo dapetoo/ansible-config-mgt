@@ -23,5 +23,13 @@ pipeline {
                 sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'  
             }
         }
+
+        stage('Run Ansible Playbook') {
+            steps {
+                sh 'echo Running playbooks' 
+                sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'  
+                sh 'ansible-playbook -i ${WORKSPACE}/inventory/dev  ${WORKSPACE}/playbooks/site.yml'
+            }
+        }
     }
 }
