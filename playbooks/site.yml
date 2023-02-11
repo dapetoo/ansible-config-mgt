@@ -15,6 +15,17 @@
 - name: database mysql configuration
   import_playbook: ../static-assignments/db.yml
 
+
+- hosts: sonarqube
+- name: Sonarqube
+  import_playbook: ../static-assignments/sonarqube.yml
+
+# - hosts: artifactory
+# - name: Artifactory
+#   import_playbook: ../static-assignments/artifactory.yml
+
+
+
 # - hosts: lb
 # - name: Loadbalancers assignment
 #   import_playbook: ../static-assignments/loadbalancers.yml
