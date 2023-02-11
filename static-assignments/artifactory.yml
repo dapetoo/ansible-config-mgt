@@ -2,4 +2,6 @@
 - hosts: artifactory
   become:  true
   roles:
+     - geerlingguy.postgresql
+     - lean_delivery.java
      - artifactory

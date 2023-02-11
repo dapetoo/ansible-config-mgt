@@ -1,0 +1,5 @@
+---
+
+- src: dockpack.base_goss
+- src: dockpack.base_java8
+- src: dockpack.base_postgres
