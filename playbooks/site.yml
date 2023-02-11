@@ -16,9 +16,9 @@
 #   import_playbook: ../static-assignments/db.yml
 
 
-# - hosts: sonarqube
-# - name: Sonarqube
-#   import_playbook: ../static-assignments/sonarqube.yml
+- hosts: sonarqube
+- name: Sonarqube
+  import_playbook: ../static-assignments/sonarqube.yml
 
 - hosts: artifactory
 - name: Artifactory

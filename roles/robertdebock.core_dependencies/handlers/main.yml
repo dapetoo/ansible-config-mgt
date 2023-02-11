@@ -1,5 +1,0 @@
----
-# handlers file for core_dependencies
-
-- name: Gather facts
-  ansible.builtin.setup:
