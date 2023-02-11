@@ -27,8 +27,9 @@ pipeline {
         stage('Run Ansible Playbook') {
             steps {
                 sh 'echo Running playbooks' 
+                ansiblePlaybook credentialsId: 'ssh-key', installation: 'ansible', disableHostKeyChecking: true, inventory: 'inventory/dev', playbook: 'playbooks/site.yml'
                 // sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'  
-                sh 'ansible-playbook -i ${WORKSPACE}/inventory/dev  ${WORKSPACE}/playbooks/site.yml'
+                // sh 'ansible-playbook -i ${WORKSPACE}/inventory/dev  ${WORKSPACE}/playbooks/site.yml'
             }
         }
     }
