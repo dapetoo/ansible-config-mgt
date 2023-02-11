@@ -3,5 +3,5 @@
   become:  true
   roles:
      - geerlingguy.postgresql
-     - lean_delivery.java
-     - artifactory
+     - dockpack.base_java8
+     - bbaassssiiee.artifactory
