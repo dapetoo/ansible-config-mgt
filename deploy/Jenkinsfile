@@ -27,7 +27,7 @@ pipeline {
         stage('Run Ansible Playbook') {
             steps {
                 sh 'echo Running playbooks' 
-                ansiblePlaybook credentialsId: 'ssh-key', installation: 'ansible', disableHostKeyChecking: true, inventory: 'inventory/dev', playbook: 'playbooks/site.yml'
+                ansiblePlaybook credentialsId: 'ssh-key', installation: 'ansible', disableHostKeyChecking: true, inventory: 'inventory/${inventory}', playbook: 'playbooks/site.yml'
             }
         }
 
