@@ -34,16 +34,16 @@
   roles:
     - role: buluma.sonarqube
 
-  # tasks:
-  #   # - name: "ensure apt cache is up to date"
-  #   #   become: true
-  #   #   ansible.builtin.apt:
-  #   #     update_cache: yes
-  #   #   when: ansible_distribution == 'Ubuntu'
+  tasks:
+    # - name: "ensure apt cache is up to date"
+    #   become: true
+    #   ansible.builtin.apt:
+    #     update_cache: yes
+    #   when: ansible_distribution == 'Ubuntu'
 
-  #   - name: "install package dependencies"
-  #     ansible.builtin.package:
-  #       name: "{{ item }}"
-  #       state: "present"
-  #     with_items:
-  #       - unzip
+    - name: "install package dependencies"
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: "present"
+      with_items:
+        - unzip
