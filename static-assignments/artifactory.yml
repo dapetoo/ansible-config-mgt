@@ -1,6 +1,5 @@
 ---
 - hosts: artifactory
-
   become:  true
   roles:
      - geerlingguy.postgresql
