@@ -1,0 +1,6 @@
+exclude_paths:
+ - ./molecule/
+rulesdir:
+  - ~/ansible-lint-rules/rules/
+use_default_rules: true
+verbosity: 1

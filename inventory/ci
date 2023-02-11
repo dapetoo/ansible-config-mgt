@@ -5,7 +5,7 @@
 <Nginx-Private-IP-Address>
 
 [sonarqube]
-<SonarQube-Private-IP-Address>
+172.31.37.67 
 
 [artifact_repository]
-<Artifact_repository-Private-IP-Address>
+172.31.37.67
