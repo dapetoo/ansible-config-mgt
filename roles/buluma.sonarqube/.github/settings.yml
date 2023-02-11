@@ -1,0 +1,8 @@
+---
+#
+# Ansible managed
+#
+repository:
+  description: An Ansible Role that install SonarQube.
+  homepage: https://buluma.github.io/
+  topics: centos, development, monitoring, sonarqube, ansible, molecule, tox, playbook, hacktoberfest

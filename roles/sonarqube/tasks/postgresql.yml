@@ -21,27 +21,39 @@
     name: postgresql
     state: started
     enabled: yes
+
+- name: Create rails user, set MD5-hashed password, grant privs
+  community.postgresql.postgresql_user:
+    name: rails
+    password: md59543f1d82624df2b31672ec0f7050460
+    role_attr_flags: CREATEDB,NOSUPERUSER
+
+# - name: Create user sonarqube
+#   community.postgresql.postgresql_user:
+#     db: sonarqube
+#     name: sonar
+#     password: sonar
+#     priv: "ALL"
+#     login_host: localhost
+#     login_password: postgres
+#     login_user: postgres
+    
+
+# - name: Create a new database sonarqubedb
+#   # become_user: postgres
+#   community.postgresql.postgresql_db:
+#     name: sonarqube
+#     encoding: UTF-8
+#     login_user: sonar
+#     login_password: sonar
+#     login_host: 127.0.0.1
      
 
-- name: create password for user postgres
-  ansible.builtin.user:
-    name: postgres
-    group: postgres
-    password: postgres
 
-- name: Create a new database sonarqubedb
-  become_user: postgres
-  community.postgresql.postgresql_db:
-    name: sonarqube
-    encoding: UTF-8
+# - name: create password for user postgres
+#   ansible.builtin.user:
+#     name: postgres
+#     group: postgres
+#     password: postgres
 
-   
-
-- name: Create user sonarqube
-  become_user: postgres
-  community.postgresql.postgresql_user:
-    db: sonarqube
-    name: sonar
-    password: sonar
-    priv: "ALL"
    

@@ -1,7 +1,6 @@
 ---
-- name: Prepare
-  hosts: sonarqube
-  become: true
+- name: Converge
+  hosts: all
   vars:
     sonar_version: 7.9.6
     sonar_plugins:
@@ -15,35 +14,22 @@
       - name: "ansible"
         version: "2.4.0"
         marketplace: true
-
-  # roles:
-  #   - name: buluma.bootstrap
-
   pre_tasks:
     - name: install openjdk (redhat)
       ansible.builtin.package:
         name: java-11-openjdk
         state: present
       when: ansible_facts['os_family'] == "RedHat"
+    - name: add backports repository
+      ansible.builtin.apt_repository:
+        repo: deb http://ftp.debian.org/debian stretch-backports main
+        state: present
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Debian"
     - name: install openjdk (debian)
       ansible.builtin.apt:
         name: openjdk-11-jdk
         state: present
       when: ansible_facts['os_family'] == "Debian"
-
   roles:
-    - role: buluma.sonarqube
-
-  # tasks:
-  #   # - name: "ensure apt cache is up to date"
-  #   #   become: true
-  #   #   ansible.builtin.apt:
-  #   #     update_cache: yes
-  #   #   when: ansible_distribution == 'Ubuntu'
-
-  #   - name: "install package dependencies"
-  #     ansible.builtin.package:
-  #       name: "{{ item }}"
-  #       state: "present"
-  #     with_items:
-  #       - unzip
+    - role: ansible-role-sonarqube
