@@ -5,7 +5,8 @@
 # https://pip.pypa.io/en/stable/user_guide/#requirements-files
 #
 # Tests run on the previous and current (latest) version of Ansible.
-ansible>=2.4
+ansible>=7.0.0
 # Some Jinja2 filters are used that are available in the newer releases.
 jinja2>=2.11.2
 jmespath
+ansible-core>=2.18.0 # not directly required, pinned by Snyk to avoid a vulnerability
