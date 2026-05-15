@@ -1,0 +1,55 @@
+# HashiCorp Vault — Helm chart 0.32.0 (Vault image 1.21.2)
+#
+# Dev mode: starts pre-initialized and pre-unsealed with in-memory storage.
+# No manual init/unseal needed. All data is lost on pod restart.
+#
+# Namespace:  vault
+# Chart:      hashicorp/vault 0.32.0
+# Install:    helm upgrade --install vault hashicorp/vault \
+#               -n vault --create-namespace \
+#               --version 0.32.0 -f vault/values.yaml
+
+global:
+  enabled: true
+
+server:
+  image:
+    repository: hashicorp/vault
+    tag: "1.21.2"
+    pullPolicy: IfNotPresent
+
+  dev:
+    enabled: true
+    devRootToken: "root"
+
+  standalone:
+    enabled: true
+
+  ha:
+    enabled: false
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  dataStorage:
+    enabled: false
+
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8200
+
+ui:
+  enabled: true
+  serviceType: ClusterIP
+
+injector:
+  enabled: false
+
+csi:
+  enabled: false
