@@ -1,0 +1,101 @@
+# Watcher — auto-unseals the vault-unseal Vault on pod restarts.
+#
+# Polls vault-unseal every 30 s. When sealed, reads the Shamir key from
+# the 'vault-unseal-keys' K8s Secret (created by install.sh) and calls
+# 'vault operator unseal'. Uses vault's own exit codes:
+#   0 = healthy/unsealed, 1 = error, 2 = sealed.
+#
+# The unseal key is injected as an env var — no kubectl or extra tooling needed.
+# RBAC is intentionally narrow: only 'get' on the one Secret it needs.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-unseal-watcher
+  namespace: vault-unseal
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: vault-unseal-watcher
+  namespace: vault-unseal
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["vault-unseal-keys"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: vault-unseal-watcher
+  namespace: vault-unseal
+subjects:
+  - kind: ServiceAccount
+    name: vault-unseal-watcher
+    namespace: vault-unseal
+roleRef:
+  kind: Role
+  name: vault-unseal-watcher
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault-unseal-watcher
+  namespace: vault-unseal
+  labels:
+    app: vault-unseal-watcher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault-unseal-watcher
+  template:
+    metadata:
+      labels:
+        app: vault-unseal-watcher
+    spec:
+      serviceAccountName: vault-unseal-watcher
+      containers:
+        - name: watcher
+          image: hashicorp/vault:1.17.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault-unseal.vault-unseal.svc.cluster.local:8200"
+            - name: UNSEAL_KEY_0
+              valueFrom:
+                secretKeyRef:
+                  name: vault-unseal-keys
+                  key: unseal-key-0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              while true; do
+                EXIT_CODE=0
+                vault status > /dev/null 2>&1 || EXIT_CODE=$?
+                if [ "$EXIT_CODE" -eq 2 ]; then
+                  echo "[$(date -u)] vault-unseal is sealed — unsealing"
+                  vault operator unseal "$UNSEAL_KEY_0" > /dev/null && \
+                    echo "[$(date -u)] unseal OK" || \
+                    echo "[$(date -u)] unseal failed"
+                elif [ "$EXIT_CODE" -ne 0 ]; then
+                  echo "[$(date -u)] vault-unseal unreachable (exit $EXIT_CODE)"
+                fi
+                sleep 30
+              done
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 10m
+            limits:
+              memory: 64Mi
+              cpu: 100m
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+      restartPolicy: Always

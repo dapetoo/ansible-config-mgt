@@ -1,0 +1,89 @@
+# Main Vault — single-replica standalone with Transit auto-unseal.
+#
+# Seal config is loaded from the 'vault-transit-seal' K8s Secret (created by
+# install.sh), mounted at /vault/config/seal.hcl. Vault loads every .hcl file
+# in its config dir, so this file is picked up alongside the standalone config.
+#
+# With Transit seal, 'vault operator init' produces recovery keys (not unseal
+# keys). The instance auto-unseals whenever vault-unseal is reachable.
+#
+# Namespace:  vault
+# Chart:      hashicorp/vault 0.32.0
+# Install:    helm upgrade --install vault hashicorp/vault \
+#               -n vault --create-namespace \
+#               --version 0.32.0 -f main-vault/values.yaml
+
+global:
+  enabled: true
+
+injector:
+  enabled: false
+
+server:
+  image:
+    repository: hashicorp/vault
+    tag: "1.17.2"
+    pullPolicy: IfNotPresent
+
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+
+      listener "tcp" {
+        tls_disable     = 1
+        address         = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+
+      storage "raft" {
+        path    = "/vault/data"
+        node_id = "vault-0"
+      }
+
+      api_addr     = "http://vault.vault.svc.cluster.local:8200"
+      cluster_addr = "http://vault-0.vault-internal.vault.svc.cluster.local:8201"
+
+  ha:
+    enabled: false
+
+  # Mount the Transit seal config from the K8s Secret created by install.sh.
+  # install.sh writes seal.hcl into this secret BEFORE deploying main vault.
+  volumes:
+    - name: vault-transit-seal
+      secret:
+        secretName: vault-transit-seal
+        optional: false
+
+  volumeMounts:
+    - name: vault-transit-seal
+      mountPath: /vault/config/seal.hcl
+      subPath: seal.hcl
+      readOnly: true
+
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    storageClass: standard-rwo
+    accessMode: ReadWriteOnce
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+  readinessProbe:
+    enabled: true
+    path: /v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204
+
+serviceAccount:
+  create: true
+  name: vault
+  annotations: {}
+
+ui:
+  enabled: true
+  serviceType: ClusterIP

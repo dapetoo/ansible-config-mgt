@@ -1,0 +1,69 @@
+# Unseal Vault — standalone single-replica Vault used as Transit seal backend.
+#
+# This Vault is intentionally minimal: no UI, 2Gi Raft storage, no injector.
+# Its only job is to hold the Transit key that auto-unseals the main HA Vault.
+# It is itself sealed by Shamir keys stored in the 'vault-unseal-keys' K8s Secret.
+# The vault-unseal-watcher Deployment (watcher.yaml) auto-unseals it on restart.
+#
+# Namespace:  vault-unseal
+# Chart:      hashicorp/vault 0.32.0
+# Install:    helm upgrade --install vault-unseal hashicorp/vault \
+#               -n vault-unseal --create-namespace \
+#               --version 0.32.0 -f unseal-vault/values.yaml
+
+global:
+  enabled: true
+
+injector:
+  enabled: false
+
+server:
+  image:
+    repository: hashicorp/vault
+    tag: "1.17.2"
+    pullPolicy: IfNotPresent
+
+  standalone:
+    enabled: true
+    config: |
+      ui = false
+
+      listener "tcp" {
+        tls_disable     = 1
+        address         = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+
+      storage "raft" {
+        path    = "/vault/data"
+        node_id = "vault-unseal-0"
+      }
+
+      api_addr     = "http://vault-unseal.vault-unseal.svc.cluster.local:8200"
+      cluster_addr = "http://vault-unseal-0.vault-unseal-internal.vault-unseal.svc.cluster.local:8201"
+
+  ha:
+    enabled: false
+
+  dataStorage:
+    enabled: true
+    size: 2Gi
+    storageClass: standard-rwo
+    accessMode: ReadWriteOnce
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # Treat sealed (204) and uninitialised (204) as "not ready" so Kubernetes
+  # waits, but does not restart a sealed pod on its own.
+  readinessProbe:
+    enabled: true
+    path: /v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204
+
+ui:
+  enabled: false
